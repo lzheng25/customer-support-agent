@@ -86,6 +86,7 @@ def generate_prediction_json(prompt: str, instructions: str, model: str | None =
 
 def _post_with_retries(request: urllib.request.Request, max_attempts: int = 5) -> dict[str, Any]:
     for attempt in range(1, max_attempts + 1):
+        print("Chat gpt api call")
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 return json.loads(response.read().decode("utf-8"))
@@ -99,12 +100,14 @@ def _post_with_retries(request: urllib.request.Request, max_attempts: int = 5) -
             if exc.code == 429 and attempt < max_attempts:
                 time.sleep(_retry_delay_seconds(detail, attempt))
                 continue
-            raise RuntimeError(f"OpenAI API request failed with status {exc.code}: {detail}") from exc
+            raise RuntimeError(
+                f"OpenAI API request failed with status {exc.code}: {detail}") from exc
         except urllib.error.URLError as exc:
             if attempt < max_attempts:
                 time.sleep(min(30, 2**attempt))
                 continue
-            raise RuntimeError(f"OpenAI API request failed after transient network errors: {exc}") from exc
+            raise RuntimeError(
+                f"OpenAI API request failed after transient network errors: {exc}") from exc
 
     raise RuntimeError("OpenAI API request failed after retries")
 
@@ -127,5 +130,6 @@ def _extract_output_text(response_body: dict[str, Any]) -> str:
                 chunks.append(content["text"])
 
     if not chunks:
-        raise RuntimeError(f"OpenAI response did not contain output text: {response_body}")
+        raise RuntimeError(
+            f"OpenAI response did not contain output text: {response_body}")
     return "".join(chunks)

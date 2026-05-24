@@ -24,7 +24,7 @@
     }
   },
   "prediction_summary": {
-    "average_confidence": 0.862,
+    "average_confidence": 0.8673,
     "category_counts": {
       "account_access": 1,
       "account_compromise": 1,

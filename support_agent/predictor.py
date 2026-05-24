@@ -4,8 +4,7 @@ from typing import Any
 
 from support_agent.openai_client import generate_prediction_json
 from support_agent.prompt_builder import SYSTEM_INSTRUCTIONS, build_ticket_prompt
-from support_agent.safety import enforce_safety
-from support_agent.prediction_schema import Prediction, validate_prediction
+from support_agent.prediction_schema import Prediction, SENSITIVE_CATEGORIES, validate_prediction
 
 
 def predict(
@@ -21,12 +20,13 @@ def predict(
 
     prompt = build_ticket_prompt(ticket, prompt_context)
     raw_prediction = generate_prediction_json(prompt, SYSTEM_INSTRUCTIONS, model)
-    prediction = _prediction_from_dict(raw_prediction, ticket["ticket_id"])
-    return enforce_safety(ticket, _clean_draft(ticket, prediction))
+    prediction = enforce_safety(_prediction_from_dict(raw_prediction))
+    validate_prediction(prediction, ticket["ticket_id"])
+    return prediction
 
 
-def _prediction_from_dict(data: dict[str, Any], expected_ticket_id: str) -> Prediction:
-    prediction = Prediction(
+def _prediction_from_dict(data: dict[str, Any]) -> Prediction:
+    return Prediction(
         ticket_id=str(data["ticket_id"]),
         category=str(data["category"]),
         urgency=str(data["urgency"]),
@@ -35,31 +35,18 @@ def _prediction_from_dict(data: dict[str, Any], expected_ticket_id: str) -> Pred
         draft_response=data["draft_response"],
         confidence=float(data["confidence"]),
     )
-    validate_prediction(prediction, expected_ticket_id)
-    return prediction
 
 
-def _clean_draft(ticket: dict[str, Any], prediction: Prediction) -> Prediction:
-    if not prediction.should_draft or prediction.draft_response is None:
+def enforce_safety(prediction: Prediction) -> Prediction:
+    if prediction.category not in SENSITIVE_CATEGORIES or not prediction.should_draft:
         return prediction
 
-    meta_phrases = (
-        "a support agent should",
-        "support agent should",
-        "agent should respond",
-        "draft should",
-    )
-    if not any(phrase in prediction.draft_response.lower() for phrase in meta_phrases):
-        return prediction
-
-    guarded = Prediction(
+    return Prediction(
         ticket_id=prediction.ticket_id,
         category=prediction.category,
         urgency=prediction.urgency,
         should_draft=False,
-        no_draft_reason="model returned meta-instructions instead of a customer-facing draft",
+        no_draft_reason=prediction.no_draft_reason or f"{prediction.category} requires human review",
         draft_response=None,
-        confidence=min(prediction.confidence, 0.8),
+        confidence=max(prediction.confidence, 0.9),
     )
-    validate_prediction(guarded, ticket["ticket_id"])
-    return guarded

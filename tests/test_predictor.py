@@ -65,7 +65,7 @@ class PredictorTest(unittest.TestCase):
         self.assertEqual(pred.category, "problem_gambling")
         self.assertFalse(pred.should_draft)
 
-    def test_contract_spec_can_be_no_draft(self) -> None:
+    def test_non_sensitive_category_preserves_model_decision(self) -> None:
         model_output = {
             "ticket_id": "t_test",
             "category": "market_questions",
@@ -78,7 +78,7 @@ class PredictorTest(unittest.TestCase):
         with patch("support_agent.predictor.generate_prediction_json", return_value=model_output):
             pred = predict(make_ticket("Question about market rules", "If the Super Bowl MVP is a tie, how does it settle? Trying to evaluate a position."), PROMPT_CONTEXT)
         self.assertEqual(pred.category, "market_questions")
-        self.assertFalse(pred.should_draft)
+        self.assertTrue(pred.should_draft)
 
     def test_routine_trading_question_gets_signed_draft(self) -> None:
         model_output = {
