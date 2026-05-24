@@ -1,0 +1,57 @@
+{
+  "evaluation_metrics": {
+    "category_accuracy": 1.0,
+    "draft_decision_accuracy": 0.9333,
+    "false_draft_on_sensitive_count": 0,
+    "false_draft_on_sensitive_rate": 0.0,
+    "sensitive_count": 6,
+    "total": 15,
+    "urgency_accuracy": 0.9333,
+    "urgency_confusion_matrix": {
+      "escalate_immediately": {
+        "escalate_immediately": 4
+      },
+      "high": {
+        "high": 5
+      },
+      "low": {
+        "low": 3,
+        "medium": 1
+      },
+      "medium": {
+        "medium": 2
+      }
+    }
+  },
+  "prediction_summary": {
+    "average_confidence": 0.862,
+    "category_counts": {
+      "account_access": 1,
+      "account_compromise": 1,
+      "bug_report": 1,
+      "deposits_withdrawals": 3,
+      "kyc_verification": 1,
+      "legal_regulatory": 1,
+      "market_questions": 2,
+      "problem_gambling": 2,
+      "tax_documents": 1,
+      "trading_mechanics": 2
+    },
+    "no_draft_count": 7,
+    "no_draft_rate": 0.4667,
+    "total": 15,
+    "urgency_counts": {
+      "escalate_immediately": 4,
+      "high": 5,
+      "low": 3,
+      "medium": 3
+    }
+  },
+  "run": {
+    "backend": "openai",
+    "eval_path": "support_files/tickets_eval.jsonl",
+    "model": "gpt-5.2",
+    "output_path": "predictions.jsonl",
+    "train_path": "support_files/tickets_train.jsonl"
+  }
+}

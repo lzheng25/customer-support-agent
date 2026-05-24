@@ -1,0 +1,6 @@
+[project]
+name = "customer-support-agent"
+version = "0.1.0"
+description = "Safety-first support ticket triage system for the Novig take-home."
+requires-python = ">=3.10"
+dependencies = []
