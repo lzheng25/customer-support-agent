@@ -6,7 +6,7 @@
     "false_draft_on_sensitive_rate": 0.0,
     "sensitive_count": 6,
     "total": 15,
-    "urgency_accuracy": 0.9333,
+    "urgency_accuracy": 0.8667,
     "urgency_confusion_matrix": {
       "escalate_immediately": {
         "escalate_immediately": 4
@@ -19,12 +19,13 @@
         "medium": 1
       },
       "medium": {
-        "medium": 2
+        "high": 1,
+        "medium": 1
       }
     }
   },
   "prediction_summary": {
-    "average_confidence": 0.864,
+    "average_confidence": 0.8753,
     "category_counts": {
       "account_access": 1,
       "account_compromise": 1,
@@ -42,9 +43,9 @@
     "total": 15,
     "urgency_counts": {
       "escalate_immediately": 4,
-      "high": 5,
+      "high": 6,
       "low": 3,
-      "medium": 3
+      "medium": 2
     }
   },
   "run": {

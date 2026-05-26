@@ -38,7 +38,15 @@ PREDICTION_JSON_SCHEMA: dict[str, Any] = {
         "should_draft": {"type": "boolean"},
         "no_draft_reason": {"type": ["string", "null"]},
         "draft_response": {"type": ["string", "null"]},
-        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": (
+                "Self-rated certainty that category, urgency, and draft/no-draft decision "
+                "are correct given the taxonomy; not a calibrated probability."
+            ),
+        },
     },
     "required": [
         "ticket_id",

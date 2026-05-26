@@ -19,7 +19,8 @@ CATEGORIES = {
 }
 
 URGENCIES = {"low", "medium", "high", "escalate_immediately"}
-SENSITIVE_CATEGORIES = {"account_compromise", "problem_gambling", "legal_regulatory"}
+SENSITIVE_CATEGORIES = {"account_compromise",
+                        "problem_gambling", "legal_regulatory"}
 
 
 @dataclass(frozen=True)
@@ -60,7 +61,8 @@ def validate_prediction(prediction: Prediction, ticket_id: str | None = None) ->
         raise ValueError(f"prediction missing fields: {sorted(missing)}")
 
     if ticket_id is not None and prediction.ticket_id != ticket_id:
-        raise ValueError(f"ticket_id mismatch: expected {ticket_id}, got {prediction.ticket_id}")
+        raise ValueError(
+            f"ticket_id mismatch: expected {ticket_id}, got {prediction.ticket_id}")
     if prediction.category not in CATEGORIES:
         raise ValueError(f"invalid category: {prediction.category}")
     if prediction.urgency not in URGENCIES:
@@ -72,13 +74,17 @@ def validate_prediction(prediction: Prediction, ticket_id: str | None = None) ->
 
     if prediction.should_draft:
         if prediction.no_draft_reason is not None:
-            raise ValueError("no_draft_reason must be null when should_draft is true")
+            raise ValueError(
+                "no_draft_reason must be null when should_draft is true")
         if not prediction.draft_response:
-            raise ValueError("draft_response is required when should_draft is true")
+            raise ValueError(
+                "draft_response is required when should_draft is true")
         if "Novig Support" not in prediction.draft_response:
             raise ValueError("draft_response must be signed as Novig Support")
     else:
         if prediction.draft_response is not None:
-            raise ValueError("draft_response must be null when should_draft is false")
+            raise ValueError(
+                "draft_response must be null when should_draft is false")
         if not prediction.no_draft_reason:
-            raise ValueError("no_draft_reason is required when should_draft is false")
+            raise ValueError(
+                "no_draft_reason is required when should_draft is false")

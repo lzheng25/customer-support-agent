@@ -18,6 +18,7 @@ Safety policy:
 - Drafts are for support agent review, not direct sending.
 - Drafts must be signed "Novig Support" and must not invent policy, promise outcomes, or state unverified facts.
 - When drafting, write the actual customer-facing draft. Do not write meta-instructions such as "a support agent should respond".
+- Confidence is your self-rated certainty that the category, urgency, and draft/no-draft decision are correct given the taxonomy. It is not a calibrated probability; lower it for ambiguous, borderline, or incomplete tickets.
 """
 
 FEW_SHOT_TICKET_IDS = [
@@ -45,7 +46,14 @@ def build_prompt_context(
         [
             "Use the taxonomy and output schema exactly.",
             "TAXONOMY:\n" + taxonomy,
-            "FEW-SHOT LABELED EXAMPLES:\n" + "\n".join(examples),
+            (
+                "FEW-SHOT LABELED EXAMPLES:\n"
+                "Each example has an input ticket and a gold_label, where gold_label is the correct training label. "
+                "Use these examples to learn category, urgency, and draft/no-draft decisions. "
+                "For draftable examples, gold_response_notes describe what a safe draft should cover; "
+                "they are not final response text.\n"
+                + "\n".join(examples)
+            ),
         ]
     )
 
@@ -73,14 +81,12 @@ def _few_shot_examples(rows: list[dict[str, Any]]) -> list[str]:
     for ticket_id in FEW_SHOT_TICKET_IDS:
         row = by_id[ticket_id]
         label = row["label"]
-        output = {
-            "ticket_id": row["ticket_id"],
+        gold_label = {
             "category": label["category"],
             "urgency": label["urgency"],
             "should_draft": label["should_draft"],
             "no_draft_reason": label["no_draft_reason"],
-            "draft_response": None if not label["should_draft"] else _example_draft(row),
-            "confidence": 0.9,
+            "gold_response_notes": label.get("gold_response_notes"),
         }
         example = {
             "input": {
@@ -89,20 +95,7 @@ def _few_shot_examples(rows: list[dict[str, Any]]) -> list[str]:
                 "body": row["body"],
                 "metadata": row.get("metadata", {}),
             },
-            "gold_output": output,
-            "gold_response_notes": label.get("gold_response_notes"),
+            "gold_label": gold_label,
         }
         examples.append(json.dumps(example, ensure_ascii=True))
     return examples
-
-
-def _example_draft(row: dict[str, Any]) -> str:
-    label = row["label"]
-    return (
-        "Hi,\n\n"
-        f"Thanks for reaching out about {row['subject']}. "
-        f"A support agent should draft a helpful response using this guidance: {label.get('gold_response_notes', '')} "
-        "Avoid promises or unverified policy claims.\n\n"
-        "Best,\n"
-        "Novig Support"
-    )
